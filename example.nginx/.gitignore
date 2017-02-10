@@ -1,0 +1,10 @@
+##
+## Ignore secrets
+##
+
+# Instance of the template-secrets
+.secrets/
+
+# Instance of the template-secrets/azure_override.tf
+# in any sub-directory
+**/azure_override.tf
