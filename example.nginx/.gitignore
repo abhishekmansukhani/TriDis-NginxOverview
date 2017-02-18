@@ -2,9 +2,12 @@
 ## Ignore secrets
 ##
 
+
 # Instance of the template-secrets
+
 .secrets/
 
-# Instance of the template-secrets/azure_override.tf
+# Instance of the template terraform.tfvars
 # in any sub-directory
-**/azure_override.tf
+
+**/terraform.tfvars

@@ -1,9 +1,17 @@
+variable "azure_client_id" {}
+variable "azure_client_secret" {}
+variable "azure_subscription_id" {}
+variable "azure_tenant_id" {}
+
+variable "virtual_machine_admin_password" {}
+variable "virtual_machine_admin_ssh_key_data" {}
+
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
-    subscription_id = ""
-    client_id       = ""
-    client_secret   = ""
-    tenant_id       = ""
+    client_id       = "${var.azure_client_id}"
+    client_secret   = "${var.azure_client_secret}"
+    subscription_id = "${var.azure_subscription_id}"
+    tenant_id       = "${var.azure_tenant_id}"
 }
 
 resource "azurerm_resource_group" "example" {
@@ -74,7 +82,7 @@ resource "azurerm_network_security_group" "example" {
     }
 
     security_rule {
-        name = "Rancher_IPsec500"
+        name = "Rancher_IpSec500"
         priority = 1040
         direction = "Inbound"
         access = "Allow"
@@ -86,7 +94,7 @@ resource "azurerm_network_security_group" "example" {
     }
 
     security_rule {
-        name = "Rancher_IPsec4500"
+        name = "Rancher_IpSec4500"
         priority = 1050
         direction = "Inbound"
         access = "Allow"
@@ -99,23 +107,11 @@ resource "azurerm_network_security_group" "example" {
 }
 
 resource "azurerm_public_ip" "virtual_network_gateway_public_ip" {
-    name = "VirtualNetworkGatewayPublicIP"
+    name = "VirtualNetworkGatewayPublicIp"
     location = "${azurerm_resource_group.example.location}"
     resource_group_name = "${azurerm_resource_group.example.name}"
     public_ip_address_allocation = "Dynamic"
 }
-
-#
-# ToDo:
-#
-#resource "null_resource" "virtual_network_gateway" {
-#    provisioner "local-exec" {
-#        command = "powershell -noprofile -command \"$ErrorActionPreference = 'Stop'; Set-PsDebug -Strict; .\\Invoke-AzureRmVirtualNetworkGatewayCreation.ps1\""
-#    }
-#    depends_on = ["${azure_virtual_network.example}",
-#                  "${azurerm_subnet.gateway}"
-#                  "${azurerm_public_ip.virtual_network_gateway_public_ip}"]
-#}
 
 resource "azurerm_storage_account" "disk_storage_account" {
     name = "diskxharymnarbectusphysi"
@@ -181,14 +177,112 @@ resource "azurerm_virtual_machine" "virtual_machine_moby1" {
     os_profile {
         computer_name = "moby1"
         admin_username = "example"
-        admin_password = ""
+        admin_password = "${var.virtual_machine_admin_password}"
     }
 
     os_profile_linux_config {
         disable_password_authentication = true
         ssh_keys {
             path = "/home/example/.ssh/authorized_keys"
-            key_data = ""
+            key_data = "${var.virtual_machine_admin_ssh_key_data}"
+        }
+    }
+}
+
+resource "azurerm_network_interface" "network_interface_moby2" {
+    name = "moby21618"
+    location = "${azurerm_resource_group.example.location}"
+    resource_group_name = "${azurerm_resource_group.example.name}"
+
+    ip_configuration {
+        name = "ipconfig1"
+        subnet_id = "${azurerm_subnet.default.id}"
+        private_ip_address_allocation = "Static"
+        private_ip_address = "10.0.0.5"
+    }
+}
+
+resource "azurerm_virtual_machine" "virtual_machine_moby2" {
+    name = "moby2"
+    location = "${azurerm_resource_group.example.location}"
+    resource_group_name = "${azurerm_resource_group.example.name}"
+    network_interface_ids = ["${azurerm_network_interface.network_interface_moby2.id}"]
+    vm_size = "Standard_A0"
+
+    storage_image_reference {
+        publisher = "Canonical"
+        offer = "UbuntuServer"
+        sku = "16.10"
+        version = "latest"
+    }
+
+    storage_os_disk {
+        name = "moby2"
+        vhd_uri = "${azurerm_storage_account.disk_storage_account.primary_blob_endpoint}${azurerm_storage_container.vhds_storage_container.name}/moby2.vhd"
+        caching = "ReadWrite"
+        create_option = "FromImage"
+    }
+
+    os_profile {
+        computer_name = "moby2"
+        admin_username = "example"
+        admin_password = "${var.virtual_machine_admin_password}"
+    }
+
+    os_profile_linux_config {
+        disable_password_authentication = true
+        ssh_keys {
+            path = "/home/example/.ssh/authorized_keys"
+            key_data = "${var.virtual_machine_admin_ssh_key_data}"
+        }
+    }
+}
+
+resource "azurerm_network_interface" "network_interface_moby3" {
+    name = "moby31618"
+    location = "${azurerm_resource_group.example.location}"
+    resource_group_name = "${azurerm_resource_group.example.name}"
+
+    ip_configuration {
+        name = "ipconfig1"
+        subnet_id = "${azurerm_subnet.default.id}"
+        private_ip_address_allocation = "Static"
+        private_ip_address = "10.0.0.6"
+    }
+}
+
+resource "azurerm_virtual_machine" "virtual_machine_moby3" {
+    name = "moby3"
+    location = "${azurerm_resource_group.example.location}"
+    resource_group_name = "${azurerm_resource_group.example.name}"
+    network_interface_ids = ["${azurerm_network_interface.network_interface_moby3.id}"]
+    vm_size = "Standard_A0"
+
+    storage_image_reference {
+        publisher = "Canonical"
+        offer = "UbuntuServer"
+        sku = "16.10"
+        version = "latest"
+    }
+
+    storage_os_disk {
+        name = "moby3"
+        vhd_uri = "${azurerm_storage_account.disk_storage_account.primary_blob_endpoint}${azurerm_storage_container.vhds_storage_container.name}/moby3.vhd"
+        caching = "ReadWrite"
+        create_option = "FromImage"
+    }
+
+    os_profile {
+        computer_name = "moby3"
+        admin_username = "example"
+        admin_password = "${var.virtual_machine_admin_password}"
+    }
+
+    os_profile_linux_config {
+        disable_password_authentication = true
+        ssh_keys {
+            path = "/home/example/.ssh/authorized_keys"
+            key_data = "${var.virtual_machine_admin_ssh_key_data}"
         }
     }
 }

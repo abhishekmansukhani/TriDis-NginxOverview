@@ -1,78 +1,78 @@
-# ToDo: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-rm-ps
+<#
+.SYNOPSIS
+Invoke New-AzureRmVirtualNetworkGateway from Terraform local-exec provisioner
+.DESCRIPTION
+Terraform local-exec needs a wrapper for New-AzureRmVirtualNetworkGateway to make it easier to use from a Terraform local-exec provisioner. From https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-howto-point-to-site-rm-ps
+#>
+function Invoke-AzureRmVirtualNetworkGatewayCreation
+{
+    [CmdletBinding()]
+    Param 
+    (
+        # Path of the saved AzureRM profile access token to use.
+        [string] $AzureRmProfilePath = "..\\.secrets\\AzureRmProfile.json",
 
-function Invoke-AzureRmVirtualNetworkGatewayCreation {
-  <#
-  .SYNOPSIS
-  Describe the function here
-  .DESCRIPTION
-  Describe the function in more detail
-  .EXAMPLE
-  Give an example of how to use it
-  .EXAMPLE
-  Give another example of how to use it
-  .PARAMETER computername
-  The computer name to query. Just one.
-  .PARAMETER logname
-  The name of a file to write failed computer names to. Defaults to errors.txt.
-  #>
-  [CmdletBinding()]
-  param
-  (
-    [Parameter(Mandatory=$True,
-    ValueFromPipeline=$True,
-    ValueFromPipelineByPropertyName=$True,
-      HelpMessage='What computer name would you like to target?')]
-    [Alias('host')]
-    [ValidateLength(3,30)]
-    [string[]]$computername,
-		
-    [string]$logname = 'errors.txt'
-  )
+        # Name of the resource group for the virtual network gateway.
+        [string] $ResourceGroupName = "Example.Nginx",
 
-  begin {
-  write-verbose "Deleting $logname"
-    del $logname -ErrorActionSilentlyContinue
+        # Name of the virtual network for the virtual network gateway.
+        [string] $VirtualNetworkName = "VirtualNetwork",
+
+        # Name of the virtual network's gateway subnet for the virtual network gateway.
+        [string] $VirtualNetworkGatewaySubnetName = "GatewaySubnet",
+
+        # Name of the public ip for the virtual network gateway.
+        [string] $VirtualNetworkGatewayPublicIpName = "VirtualNetworkGatewayPublicIp",
+
+        # Name of the virtual network gateway.
+        [string] $VirtualNetworkGatewayName = "VirtualNetworkGateway",
+
+        # Location of the virtual network gateway.
+        [string] $Location = "East US",
+
+        # Name of the IP configuration for the virtual network gateway.
+        [string] $VirtualNetworkGatewayIpConfigName = "gwipconfig1",
+
+        # Client address pool for the virtual network gateway (in CIDR notation).
+        [string] $VirtualNetworkGatewayClientAddressPoolCidr = "10.0.1.0/24",
+
+        # Name of a CA certificate that will sign VPN client certificates.
+        [string] $VpnClientRootCertificateName = "NGINX-Example-VPN-CA",
+
+        # Path of the CA certificate that will sign VPN client certificates.
+        [string] $VpnClientRootCertificatePath = "..\\.secrets\\NGINX-Example-VPN-CA.crt"
+    )
+    Begin
+    {
+        $ErrorActionPreference = "Stop"
+
+        $UseDebugOrVerboseOutput = $true
+        if ($PSBoundParameters.ContainsKey("Debug") -or $PSBoundParameters.ContainsKey("Verbose") -or ($DebugPreference -ne "SilentlyContinue") -or ($VerbosePreference -ne "SilentlyContinue"))
+        {
+            $UseDebugOrVerboseOutput = $true
+        }
+
+        [Environment]::CurrentDirectory = get-location
   }
 
-  process {
-       Login-AzureRmAccount
-       Get-AzureRmSubscription
-       Select-AzureRmSubscription -SubscriptionName "Name of subscription"
- $VNetName  = "VNet1"
- $FESubName = "FrontEnd"
- $BESubName = "Backend"
- $GWSubName = "GatewaySubnet"
- $VNetPrefix1 = "192.168.0.0/16"
- $VNetPrefix2 = "10.254.0.0/16"
- $FESubPrefix = "192.168.1.0/24"
- $BESubPrefix = "10.254.1.0/24"
- $GWSubPrefix = "192.168.200.0/26"
- $VPNClientAddressPool = "172.16.201.0/24"
- $RG = "TestRG"
- $Location = "East US"
- $DNS = "8.8.8.8"
- $GWName = "VNet1GW"
- $GWIPName = "VNet1GWPIP"
- $GWIPconfName = "gwipconf"
- New-AzureRmResourceGroup -Name $RG -Location $Location
- $fesub = New-AzureRmVirtualNetworkSubnetConfig -Name $FESubName -AddressPrefix $FESubPrefix
- $besub = New-AzureRmVirtualNetworkSubnetConfig -Name $BESubName -AddressPrefix $BESubPrefix
- $gwsub = New-AzureRmVirtualNetworkSubnetConfig -Name $GWSubName -AddressPrefix $GWSubPrefix
- New-AzureRmVirtualNetwork -Name $VNetName -ResourceGroupName $RG -Location $Location -AddressPrefix $VNetPrefix1,$VNetPrefix2 -Subnet $fesub, $besub, $gwsub -DnsServer $DNS
- $vnet = Get-AzureRmVirtualNetwork -Name $VNetName -ResourceGroupName $RG
- $subnet = Get-AzureRmVirtualNetworkSubnetConfig -Name "GatewaySubnet" -VirtualNetwork $vnet
- $pip = New-AzureRmPublicIpAddress -Name $GWIPName -ResourceGroupName $RG -Location $Location -AllocationMethod Dynamic
- $ipconf = New-AzureRmVirtualNetworkGatewayIpConfig -Name $GWIPconfName -Subnet $subnet -PublicIpAddress $pip
-    $P2SRootCertName = "Mycertificatename.cer"
-    $filePathForCert = "C:\cert\Mycertificatename.cer"
-    $cert = new-object System.Security.Cryptography.X509Certificates.X509Certificate2($filePathForCert)
-    $CertBase64 = [system.convert]::ToBase64String($cert.RawData)
-    $p2srootcert = New-AzureRmVpnClientRootCertificate -Name $P2SRootCertName -PublicCertData $CertBase64
-    New-AzureRmVirtualNetworkGateway -Name $GWName -ResourceGroupName $RG `
-    -Location $Location -IpConfigurations $ipconf -GatewayType Vpn `
-    -VpnType RouteBased -EnableBgp $false -GatewaySku Standard `
-    -VpnClientAddressPool $VPNClientAddressPool -VpnClientRootCertificates $p2srootcert
+  Process {
 
+        Select-AzureRmProfile -Path $AzureRmProfilePath
 
+        $VirtualNetwork = Get-AzureRmVirtualNetwork -Name $VirtualNetworkName -ResourceGroupName $ResourceGroupName
+
+        $VirtualNetworkGatewaySubnet = Get-AzureRmVirtualNetworkSubnetConfig -Name $VirtualNetworkGatewaySubnetName -VirtualNetwork $VirtualNetwork
+
+        $VirtualNetworkGatewayPublicIp = Get-AzureRmPublicIpAddress -Name $VirtualNetworkGatewayPublicIpName -ResourceGroupName $ResourceGroupName
+
+        $VirtualNetworkGatewayIpConfig = New-AzureRmVirtualNetworkGatewayIpConfig -Name $VirtualNetworkGatewayIpConfigName -Subnet $VirtualNetworkGatewaySubnet -PublicIpAddress $VirtualNetworkGatewayPublicIp
+
+        $VpnClientRootCertificateX509Certificate2 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($VpnClientRootCertificatePath)
+
+        $VpnClientRootCertificateBase64 = [System.Convert]::ToBase64String($VpnClientRootCertificateX509Certificate2.RawData)
+
+        $VpnClientRootCertificate = New-AzureRmVpnClientRootCertificate -Name $VpnClientRootCertificateName -PublicCertData $VpnClientRootCertificateBase64
+
+        New-AzureRmVirtualNetworkGateway -Name $VirtualNetworkGatewayName -ResourceGroupName $ResourceGroupName -Location $Location -IpConfigurations $VirtualNetworkGatewayIpConfig -GatewayType Vpn -VpnType RouteBased -EnableBgp $false -GatewaySku Standard -VpnClientAddressPool $VirtualNetworkGatewayClientAddressPoolCidr -VpnClientRootCertificates $VpnClientRootCertificate
   }
 }
