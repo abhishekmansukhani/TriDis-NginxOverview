@@ -10,7 +10,7 @@ function Invoke-AzureRmVirtualNetworkGatewayCreation
     Param 
     (
         # Path of the saved AzureRM profile access token to use.
-        [string] $AzureRmProfilePath = "..\\.secrets\\AzureRmProfile.json",
+        [string] $AzureRmProfilePath = "..\\azure-secrets\\AzureRmProfile.json",
 
         # Name of the resource group for the virtual network gateway.
         [string] $ResourceGroupName = "Example.Nginx",
@@ -40,7 +40,7 @@ function Invoke-AzureRmVirtualNetworkGatewayCreation
         [string] $VpnClientRootCertificateName = "NGINX-Example-VPN-CA",
 
         # Path of the CA certificate that will sign VPN client certificates.
-        [string] $VpnClientRootCertificatePath = "..\\.secrets\\NGINX-Example-VPN-CA.crt"
+        [string] $VpnClientRootCertificatePath = "..\\azure-secrets\\NGINX-Example-VPN-CA.crt"
     )
     Begin
     {

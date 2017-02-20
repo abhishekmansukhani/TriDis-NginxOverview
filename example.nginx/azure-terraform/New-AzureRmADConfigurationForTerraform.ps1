@@ -17,7 +17,7 @@ function New-AzureRmADConfigurationForTerraform
         [string] $AzureRmADApplicationPassword = "",
 
         # Path to save the AzureRM profile access token.
-        [string] $AzureRmProfilePath = "..\\.secrets\\AzureRmProfile.json"
+        [string] $AzureRmProfilePath = "..\\azure-secrets\\AzureRmProfile.json"
     )
     Begin
     {

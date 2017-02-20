@@ -3,11 +3,7 @@
 ##
 
 
-# Instance of the template-secrets
-
-.secrets/
-
-# Instance of the template terraform.tfvars
-# in any sub-directory
-
-**/terraform.tfvars
+# 
+# Ignore an instance of the azure-template-secrets directory
+#
+azure-secrets/
