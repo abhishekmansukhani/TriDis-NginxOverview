@@ -1,0 +1,7 @@
+##
+## Ignore secrets
+##
+
+ca-certs.pem
+server.crt
+server.key

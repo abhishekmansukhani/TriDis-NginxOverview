@@ -1,9 +1,0 @@
-##
-## Ignore secrets
-##
-
-
-# 
-# Ignore an instance of the azure-template-secrets directory
-#
-azure-secrets/

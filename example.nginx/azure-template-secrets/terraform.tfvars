@@ -1,7 +1,0 @@
-azure_client_id = ""
-azure_client_secret = ""
-azure_subscription_id = ""
-azure_tenant_id = ""
-virtual_machine_admin_password = ""
-virtual_machine_admin_ssh_key_data = ""
-virtual_machine_size = ""

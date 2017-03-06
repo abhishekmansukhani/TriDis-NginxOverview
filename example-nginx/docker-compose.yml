@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+
+  example-nginx-reverse-proxy-resolved:
+    build:
+      context: ./example-nginx-reverse-proxy-resolved
+      dockerfile: Dockerfile
+    image: example-nginx-reverse-proxy-resolved:latest
+    links:
+      - example-service-hello-world
+    ports:
+      - "8080:80"
+
+  example-nginx-reverse-proxy-upstream:
+    build:
+      context: ./example-nginx-reverse-proxy-upstream
+      dockerfile: Dockerfile
+    image: example-nginx-reverse-proxy-upstream:latest
+    links:
+      - example-service-hello-world
+    ports:
+      - "8180:80"
+
+  example-nginx-ssl-termination:
+    build:
+      context: ./example-nginx-ssl-termination
+      dockerfile: Dockerfile
+    image: example-nginx-ssl-termination:latest
+    links:
+      - example-service-hello-world
+    volumes:
+      - ./server.crt:/etc/nginx/ssl/example.com/server.crt
+      - ./server.key:/etc/nginx/ssl/example.com/server.key
+      - ./ca-certs.pem:/etc/nginx/ssl/example.com/ca-certs.pem
+    ports:
+      - "8443:443"
+
+  example-service-hello-world:
+    build:
+      context: ./example-service-hello-world/HelloWorld
+      dockerfile: Dockerfile
+    image: example-service-hello-world:latest
+    ports:
+      - "8280:80"
+
+  reference-nginx-mainline-jessie:
+    build:
+      context: ./reference-nginx-mainline-jessie
+      dockerfile: Dockerfile
+    image: reference-nginx-mainline-jessie:latest
+    ports:
+      - "8380:80"

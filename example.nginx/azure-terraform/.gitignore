@@ -1,6 +1,0 @@
-##
-## Ignore Terraform
-##
-
-*.tfstate
-*.tfvars
